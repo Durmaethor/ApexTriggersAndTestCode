@@ -1,0 +1,38 @@
+@IsTest
+public class TestAccountAddressTrigger {
+    
+    @IsTest
+    public static void testAccountBillingTriggerTRUE(){
+        
+        // Create a test account, inputting the boolean TRUE and 2 values.
+    	Account acct = new Account(Name = 'Bob\'s',
+                                    AccountNumber = '1111',
+                                    Match_Billing_Address__c = TRUE,
+                              		BillingPostalCode = '84045',
+                                  	Shipping_Zip_Code__c = '84046');
+    	insert acct;
+        
+        // Pull the newly created Account to test trigger.
+        Account acctTest = [SELECT Id, BillingPostalCode, Shipping_Zip_Code__c FROM Account WHERE Id = :acct.Id];
+        System.assertEquals(acctTest.Shipping_Zip_Code__c, '84045');
+        
+    }
+    
+    @IsTest
+    public static void testAccountBillingTriggerFALSE(){
+        
+        // Create a test account, inputting the boolean FALSE and 2 values
+        Account acct = new Account(Name = 'Bob\'s',
+                                    AccountNumber = '1111',
+                                    Match_Billing_Address__c = FALSE,
+                              		BillingPostalCode = '84045',
+                                  	Shipping_Zip_Code__c = '84046');
+        
+        insert acct;
+        
+        // Pull in newly created Account to test trigger
+        Account acctTest = [SELECT Id, BillingPostalCode, Shipping_Zip_Code__c FROM Account WHERE Id = :acct.Id];
+        System.assertEquals(acctTest.Shipping_Zip_Code__c, '84046');
+    }
+
+}

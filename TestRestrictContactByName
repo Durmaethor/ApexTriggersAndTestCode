@@ -1,0 +1,26 @@
+@IsTest
+public class TestRestrictContactByName {
+    
+    @IsTest
+    static void testRestrictContactByNameWithNoFirstName(){
+        // test data setup
+        // Create a contact leaving the last name empty.
+        Contact con = new Contact(FirstName = '', LastName = 'Kramer');
+        insert con;
+        // Pull the inserted contact field into a variable for test
+        Contact c = [SELECT Id, FirstName FROM Contact WHERE Id = :con.Id];
+        System.assertEquals(c.FirstName, null);
+    }
+    
+    @IsTest
+    static void testRestrictContactByNameWithFirstName(){
+        // Create a contact with a name added to FirstName
+        Contact con2 = new Contact(FirstName = 'Ryan', LastName = 'Kramer');
+        insert con2;
+        
+        Contact c1 = [SELECT Id, FirstName FROM Contact WHERE Id = :con2.Id];
+        System.assertEquals(c1.FirstName, 'Ryan');
+    }
+    
+
+}

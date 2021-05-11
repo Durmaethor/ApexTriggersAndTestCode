@@ -1,0 +1,51 @@
+trigger AccountTrigger on Account (before insert, before update, after insert, after update) {
+    
+    switch on trigger.operationType {
+        
+        when BEFORE_INSERT, BEFORE_UPDATE {
+            
+            // create a list to house accounts in
+            List<Account> acclst = new List<Account>();
+            
+    		  // iterate through accounts brought in by the trigger
+              for(account a:trigger.new){
+                  
+                  	// If checkbox is true and there is a value, match the two fields.
+                    if(a.Match_Billing_Address__c==true && a.BillingPostalCode!=null){
+                    a.Shipping_Zip_Code__c=a.BillingPostalCode;
+        			}
+        	  }
+        }
+              
+        when AFTER_INSERT, AFTER_UPDATE {
+            
+            // Create a list to store any created projects in
+            List<Client_Project__c> projList = new List<Client_Project__c>();
+            
+            // Get the related projects for the accounts in this trigger
+            Map<Id, Account> accountsWithProjects = new Map<Id, Account>(
+                [SELECT Id, (SELECT Id FROM Client_Projects__r) FROM Account WHERE Id IN :Trigger.New]);
+            
+            // Add a project to each account if it doesn't already have one.
+            // Iterate through each account.
+            for(Account acct : Trigger.New) {
+                
+                // Check if the account already has a related project
+                if (accountsWithProjects.get(acct.Id).Client_Projects__r.size() == 0) {
+                    
+                    // If no project exists, create a project to start client onboarding
+                    projList.add(new Client_Project__c(Name = 'Onboarding - ' + acct.Name,
+                                                       Client_Projects__c = acct.Id,
+                                                       Project_Type__c = 'Onboarding',
+                                                       Due_Date__c = System.today().addDays(14)));
+                	}
+            }
+            
+            if (projList.size() > 0) {
+                insert projList;
+            }    
+            
+        }
+        }
+
+}

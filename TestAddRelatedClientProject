@@ -1,0 +1,30 @@
+@IsTest
+private class TestAddRelatedClientProject {
+    
+    @IsTest
+    private static void testAddRelatedClientProjectToAccount(){
+        
+        // test data setup
+        // Create an account
+        Account acct = new Account(Name = 'Zug Zug', 
+                                  AccountNumber = '1111',
+                                  BillingPostalCode = '84045');
+        insert acct;
+        
+        
+    	Account acctAndProj = [SELECT Id, Name, (SELECT Id, Name FROM Client_Projects__r) FROM Account WHERE Id = :acct.Id];
+        List<CLient_Project__c> newProj = acctAndProj.Client_Projects__r;
+        
+        String projName;
+        
+        for(Client_Project__c projects : newProj){
+            
+           projName = projects.Name;
+            
+           System.assertEquals(projName, 'Onboarding - Zug Zug'); 
+            
+        }
+        
+    }
+
+}
